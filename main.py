@@ -65,6 +65,7 @@ if __name__ == "__main__":
 		"learning_rate": args.lr,          
 	}
 	del kwargs['env']
+	del kwargs['seed']
 	# Initialize policy
 	# ----------------------------------------------
 	if args.policy == "DQN":

@@ -22,7 +22,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy", default="DQN", type=str)         # Policy name
 	parser.add_argument("--env", default="Pong", type=str)           # OpenAI gym environment name
-	parser.add_argument("--num_envs", default=10, type=int)          # Num of vector-envs paralleled
+	parser.add_argument("--num_envs", default=32, type=int)          # Num of vector-envs paralleled
 	parser.add_argument("--seed", default=0, type=int)               # Set seeds for Gym, PyTorch and Numpy
 	parser.add_argument("--start_timesteps", default=1e4, type=int)  # Time steps for initial random policy
 	parser.add_argument("--eval_freq", default=1e3, type=int)        # How often (time steps) we evaluate

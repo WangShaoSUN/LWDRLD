@@ -22,6 +22,7 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy", default="DQN", type=str)         # Policy name
 	parser.add_argument("--env", default="Pong", type=str)           # OpenAI gym environment name
+	parser.add_argument("--lr", default=1e-4, type=float)           # OpenAI gym environment name
 	parser.add_argument("--num_envs", default=32, type=int)          # Num of vector-envs paralleled
 	parser.add_argument("--seed", default=0, type=int)               # Set seeds for Gym, PyTorch and Numpy
 	parser.add_argument("--start_timesteps", default=1e4, type=int)  # Time steps for initial random policy
@@ -59,31 +60,32 @@ if __name__ == "__main__":
 		"action_dim": action_dim,
 		"discount": args.discount,
 		"gradient_clip": args.gradient_clip,
+		"learning_rate": args.lr,          
 	}
 
 	# Initialize policy
 	# ----------------------------------------------
 	if args.policy == "DQN":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = DQN.DQN(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		args.batch_size = 64
 	elif args.policy == "Double_DQN":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = Double_DQN.DoubleDQN(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		args.batch_size = 64
 	# ----------------------------------------------
 	elif args.policy == "Dueling_DQN":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = Dueling_DQN.DuelingDQN(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 	elif args.policy == "Dueling_Double_DQN":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = Dueling_Double_DQN.DuelingDoubleDQN(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 	else:
@@ -105,7 +107,7 @@ if __name__ == "__main__":
 	_replay_buffer = replay_buffer.ReplayBuffer(int(args.buffer_size))
 	
 	print("Collecting experience...")
-	epinfobuf = deque(maxlen=100)  # episode step for accumulate reward 
+	epinfobuf = deque(maxlen=50)  # episode step for accumulate reward 
 	start_time = time.time()  # check learning time
 
 	states = np.array(env.reset())  # env reset, output array of num of `#num_envs` states

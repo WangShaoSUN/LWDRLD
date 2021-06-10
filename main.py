@@ -57,6 +57,8 @@ if __name__ == "__main__":
 	action_dim = env.action_space.n
 
 	kwargs = {
+		"env":args.env,
+		"seed":args.seed,
 		"action_dim": action_dim,
 		"discount": args.discount,
 		"gradient_clip": args.gradient_clip,

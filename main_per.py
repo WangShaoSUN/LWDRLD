@@ -110,11 +110,11 @@ if __name__ == "__main__":
 	# Setup loggers
 	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False)
 	logger = EpochLogger(**logger_kwargs)
-
+        logger.save_config(kwargs)
 	_replay_buffer = replay_buffer.PrioritizedReplayBuffer(int(args.buffer_size), args.alpha_per)
 	
 	print("Collecting experience...")
-	epinfobuf = deque(maxlen=100)  # episode step for accumulate reward 
+	epinfobuf = deque(maxlen=50)  # episode step for accumulate reward 
 	start_time = time.time()  # check learning time
 
 	states = np.array(env.reset())  # env reset, output array of num of `#num_envs` states

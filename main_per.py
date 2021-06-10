@@ -23,11 +23,12 @@ if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--policy", default="DQN", type=str)         # Policy name
 	parser.add_argument("--env", default="Pong", type=str)           # OpenAI gym environment name
+	parser.add_argument("--lr", default=1e-4, type=float) 
 	parser.add_argument("--num_envs", default=10, type=int)          # Num of vector-envs paralleled
 	parser.add_argument("--seed", default=0, type=int)               # Set seeds for Gym, PyTorch and Numpy
 	parser.add_argument("--start_timesteps", default=1e4, type=int)  # Time steps for initial random policy
 	parser.add_argument("--eval_freq", default=1e3, type=int)        # How often (time steps) we evaluate
-	parser.add_argument("--max_timesteps", default=2e7, type=int)    # Max timesteps to run environment
+	parser.add_argument("--max_timesteps", default=5e7+2, type=int)    # Max timesteps to run environment
 	parser.add_argument("--discount", default=0.99, type=float)      # Discount factor
 	parser.add_argument("--policy_freq", default=1e3, type=int)      # Frequency of delayed policy updates
 	parser.add_argument("--update_freq", default=4, type=int)        # Frequency of updating the Q function
@@ -62,20 +63,21 @@ if __name__ == "__main__":
 		"action_dim": action_dim,
 		"discount": args.discount,
 		"gradient_clip": args.gradient_clip,
+		"learning_rate": args.lr
 	}
 
 	# Initialize policy
 	# ----------------------------------------------
 	if args.policy == "DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = DQN_per.DQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
 		args.batch_size = 64
 	elif args.policy == "Double_DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = Double_DQN_per.DoubleDQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
@@ -83,13 +85,13 @@ if __name__ == "__main__":
 	# ----------------------------------------------
 	elif args.policy == "Dueling_DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = Dueling_DQN_per.DuelingDQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
 	elif args.policy == "Dueling_Double_DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-		kwargs["learning_rate"] = 1e-4
+# 		kwargs["learning_rate"] = 1e-4
 		policy = Dueling_Double_DQN_per.DuelingDoubleDQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta

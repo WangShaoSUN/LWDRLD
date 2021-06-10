@@ -27,7 +27,7 @@ if __name__ == "__main__":
 	parser.add_argument("--seed", default=0, type=int)               # Set seeds for Gym, PyTorch and Numpy
 	parser.add_argument("--start_timesteps", default=1e4, type=int)  # Time steps for initial random policy
 	parser.add_argument("--eval_freq", default=1e3, type=int)        # How often (time steps) we evaluate
-	parser.add_argument("--max_timesteps", default=2e7, type=int)    # Max timesteps to run environment
+	parser.add_argument("--max_timesteps", default=5e7+2, type=int)    # Max timesteps to run environment
 	parser.add_argument("--discount", default=0.99, type=float)      # Discount factor
 	parser.add_argument("--policy_freq", default=1e3, type=int)      # Frequency of delayed policy updates
 	parser.add_argument("--update_freq", default=4, type=int)        # Frequency of updating the Q function

@@ -57,20 +57,20 @@ if __name__ == "__main__":
 	action_dim = env.action_space.n
 
 	kwargs = {
-		"env":args.env,
-		"seed":args.seed,
+# 		"env":args.env,
+# 		"seed":args.seed,
 		"action_dim": action_dim,
 		"discount": args.discount,
 		"gradient_clip": args.gradient_clip,
 		"learning_rate": args.lr,          
 	}
-	logdir = './%s' % args.policy +'/%s' % args.env+ '/%i' % int(time.time())
-	# Setup loggers
-	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False,data_dir=logdir)
-	logger = EpochLogger(**logger_kwargs)
-	logger.save_config(kwargs)
-	del kwargs['env']
-	del kwargs['seed']
+# 	logdir = './%s' % args.policy +'/%s' % args.env+ '/%i' % int(time.time())
+# 	# Setup loggers
+# 	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False,data_dir=logdir)
+# 	logger = EpochLogger(**logger_kwargs)
+# 	logger.save_config(kwargs)
+# 	del kwargs['env']
+# 	del kwargs['seed']
 	# Initialize policy
 	# ----------------------------------------------
 	if args.policy == "DQN":
@@ -107,11 +107,13 @@ if __name__ == "__main__":
 		if not os.path.exists(f"./models/{policy_file}"):
 			assert f"The loading model path of `../models/{policy_file}` does not exist! "
 		policy.load(f"./models/{policy_file}")
-# 	logdir = './%s' % args.policy +'/%s' % args.env+ '/%i' % int(time.time())
-# 	# Setup loggers
-# 	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False,data_dir=logdir)
-# 	logger = EpochLogger(**logger_kwargs)
-# 	logger.save_config(kwargs)
+	logdir = './%s' % args.policy +'/%s' % args.env+ '/%i' % int(time.time())
+	# Setup loggers
+	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False,data_dir=logdir)
+	logger = EpochLogger(**logger_kwargs)
+	kwargs['env']=args.env
+	kwargs['seed']=args.seed
+	logger.save_config(kwargs)
 	_replay_buffer = replay_buffer.ReplayBuffer(int(args.buffer_size))
 	
 	print("Collecting experience...")

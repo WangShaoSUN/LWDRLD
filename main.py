@@ -102,7 +102,7 @@ if __name__ == "__main__":
 		if not os.path.exists(f"./models/{policy_file}"):
 			assert f"The loading model path of `../models/{policy_file}` does not exist! "
 		policy.load(f"./models/{policy_file}")
-	logdir = './%s' % args.policy +'/%i' % args.env+ '/%i' % int(time.time())
+	logdir = './%s' % args.policy +'/%s' % args.env+ '/%i' % int(time.time())
 	# Setup loggers
 	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False,data_dir=logdir)
 	logger = EpochLogger(**logger_kwargs)

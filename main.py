@@ -103,7 +103,7 @@ if __name__ == "__main__":
 	# Setup loggers
 	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False)
 	logger = EpochLogger(**logger_kwargs)
-
+        logger.save_config(kwargs)
 	_replay_buffer = replay_buffer.ReplayBuffer(int(args.buffer_size))
 	
 	print("Collecting experience...")

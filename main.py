@@ -64,7 +64,7 @@ if __name__ == "__main__":
 		"gradient_clip": args.gradient_clip,
 		"learning_rate": args.lr,          
 	}
-
+	del kwargs['env']
 	# Initialize policy
 	# ----------------------------------------------
 	if args.policy == "DQN":

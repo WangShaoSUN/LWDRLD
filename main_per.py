@@ -113,7 +113,7 @@ if __name__ == "__main__":
 	logger = EpochLogger(**logger_kwargs)
 	kwargs['env'] = args.env
 	kwargs['seed'] = args.seed
-        logger.save_config(kwargs)
+	logger.save_config(kwargs)
 
 	_replay_buffer = replay_buffer.PrioritizedReplayBuffer(int(args.buffer_size), args.alpha_per)
 	

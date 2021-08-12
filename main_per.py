@@ -1,5 +1,6 @@
 import random
 import torch
+print(torch.__version__)
 import argparse
 import os
 import time
@@ -21,14 +22,13 @@ from spinupUtils.run_utils import setup_logger_kwargs
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--policy", default="DQN", type=str)         # Policy name
-	parser.add_argument("--env", default="Pong", type=str)           # OpenAI gym environment name
-	parser.add_argument("--lr", default=1e-4, type=float) 
-	parser.add_argument("--num_envs", default=10, type=int)          # Num of vector-envs paralleled
+	parser.add_argument("--policy", default="DQN_per", type=str)         # Policy name
+	parser.add_argument("--env", default="Alien", type=str)           # OpenAI gym environment name
+	parser.add_argument("--num_envs", default=32, type=int)          # Num of vector-envs paralleled
 	parser.add_argument("--seed", default=0, type=int)               # Set seeds for Gym, PyTorch and Numpy
 	parser.add_argument("--start_timesteps", default=1e4, type=int)  # Time steps for initial random policy
 	parser.add_argument("--eval_freq", default=1e3, type=int)        # How often (time steps) we evaluate
-	parser.add_argument("--max_timesteps", default=5e7+2, type=int)    # Max timesteps to run environment
+	parser.add_argument("--max_timesteps", default=5e7, type=int)    # Max timesteps to run environment
 	parser.add_argument("--discount", default=0.99, type=float)      # Discount factor
 	parser.add_argument("--policy_freq", default=1e3, type=int)      # Frequency of delayed policy updates
 	parser.add_argument("--update_freq", default=4, type=int)        # Frequency of updating the Q function
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 	parser.add_argument("--beta0_per", default=0.4, type=float)      # Initial value of beta for prioritized replay buffer
 	parser.add_argument("--save_model", action="store_true")         # Save model and optimizer parameters
 	parser.add_argument("--load_model", default="")                  # Model-loading file name, "" doesn't load, "default" uses file_name
-	parser.add_argument("--exp_name", type=str)       				 # Name for algorithms
+	parser.add_argument("--exp_name", type=str,default="DQN_per"),       				 # Name for algorithms
 	args = parser.parse_args()
 
 	file_name = f"{args.policy}_{args.env}_{args.seed}"
@@ -53,6 +53,7 @@ if __name__ == "__main__":
 	# Set seeds
 	torch.manual_seed(args.seed)
 	if torch.cuda.is_available():
+		print("cuda available")
 		torch.cuda.manual_seed_all(args.seed)
 	np.random.seed(args.seed)
 	random.seed(args.seed)
@@ -63,21 +64,20 @@ if __name__ == "__main__":
 		"action_dim": action_dim,
 		"discount": args.discount,
 		"gradient_clip": args.gradient_clip,
-		"learning_rate": args.lr
 	}
 
 	# Initialize policy
 	# ----------------------------------------------
 	if args.policy == "DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-# 		kwargs["learning_rate"] = 1e-4
+		kwargs["learning_rate"] = 1e-4
 		policy = DQN_per.DQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
 		args.batch_size = 64
 	elif args.policy == "Double_DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-# 		kwargs["learning_rate"] = 1e-4
+		kwargs["learning_rate"] = 1e-4
 		policy = Double_DQN_per.DoubleDQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
@@ -85,13 +85,13 @@ if __name__ == "__main__":
 	# ----------------------------------------------
 	elif args.policy == "Dueling_DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-# 		kwargs["learning_rate"] = 1e-4
+		kwargs["learning_rate"] = 1e-4
 		policy = Dueling_DQN_per.DuelingDQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
 	elif args.policy == "Dueling_Double_DQN_per":
 		kwargs["policy_freq"] = int(args.policy_freq) // int(args.num_envs)
-# 		kwargs["learning_rate"] = 1e-4
+		kwargs["learning_rate"] = 1e-4
 		policy = Dueling_Double_DQN_per.DuelingDoubleDQN_PER(**kwargs)
 		eps_schedule = LinearSchedule(1.0, 0.01, 1e6)  # annealing epsilon
 		beta_schedule = LinearSchedule(args.beta0_per, 1.0, args.max_timesteps - args.start_timesteps)  # annealing beta
@@ -108,13 +108,17 @@ if __name__ == "__main__":
 		policy.load(f"./models/{policy_file}")
 	
 	# Setup loggers
-	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False)
+	logdir = './%s' % args.policy + '/%s' % args.env + '/%i' % int(time.time())
+	logger_kwargs = setup_logger_kwargs(args.exp_name, args.seed, datestamp=False,data_dir=logdir)
 	logger = EpochLogger(**logger_kwargs)
-	logger.save_config(kwargs)
+	kwargs['env'] = args.env
+	kwargs['seed'] = args.seed
+        logger.save_config(kwargs)
+
 	_replay_buffer = replay_buffer.PrioritizedReplayBuffer(int(args.buffer_size), args.alpha_per)
 	
 	print("Collecting experience...")
-	epinfobuf = deque(maxlen=50)  # episode step for accumulate reward 
+	epinfobuf = deque(maxlen=100)  # episode step for accumulate reward 
 	start_time = time.time()  # check learning time
 
 	states = np.array(env.reset())  # env reset, output array of num of `#num_envs` states
@@ -165,4 +169,3 @@ if __name__ == "__main__":
 			logger.dump_tabular()
 
 	print("The training is done!")
-	
